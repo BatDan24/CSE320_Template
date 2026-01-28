@@ -192,7 +192,7 @@ The program uses a two-pass argument processing approach:
 - Locate the `-f` flag and extract the associated filename
 - Validate that `-f` is present and has a filename argument
 
-If `-h` is specified, the program prints the usage message to standard error output
+If `-h` is specified, the program prints the usage message to standard output
 and exits with status `EXIT_SUCCESS`, ignoring all other arguments.
 
 If `-f` is not specified or is missing its filename argument, the program prints
@@ -628,13 +628,13 @@ Breaking down these 13 bytes:
 - **Filter method** (1 byte): `0x00` = adaptive filtering
 - **Interlace method** (1 byte): `0x00` = no interlacing
 
-After the 13 bytes of IHDR data comes the 4-byte CRC checksum: `0xfa`, `0x4e`, `0x55`, `0xe6`
-in octal = `0xFA4E5598` in hexadecimal. This CRC is computed over the chunk type ("IHDR")
+After the 13 bytes of IHDR data comes the 4-byte CRC checksum: 
+`0xFA4E55E6` in hexadecimal. This CRC is computed over the chunk type ("IHDR")
 and the chunk data (the 13 bytes we just analyzed).
 
 The next chunk starts immediately after the CRC. Looking at offset 0000040, we see:
-- **Length** (4 bytes): `000`, `000`, `001`, `370` in octal = `0x000001F8` in hex = `504` in decimal
-- **Type** (4 bytes): `120`, `114`, `124`, `105` = `PLTE` (Palette chunk)
+- **Length** (4 bytes): `0x000001F8` in hex = `504` in decimal
+- **Type** (4 bytes): `0x50` `0x4c` `0x54`  `0x45` = `PLTE` (Palette chunk)
 
 Since this is a color type 3 (palette) image, the PLTE chunk contains the color palette.
 The length of 504 bytes means there are 504 / 3 = 168 color entries in the palette.
@@ -645,8 +645,7 @@ The PLTE data starts at offset 0000050. The first few color entries are:
 - Color 1: R=`004` (0x04), G=`000` (0x00), B=`006` (0x06) - another dark color
 - Color 2: R=`005` (0x05), G=`001` (0x01), B=`012` (0x0A) - slightly lighter
 
-After all 504 bytes of palette data comes the PLTE CRC: `107`, `160`, `114`, `000`
-in octal = `0x47A07000` in hexadecimal.
+After all 504 bytes of palette data comes the PLTE CRC: `0x47A07000` in hexadecimal.
 
 The pattern continues: each chunk follows the same structure (length, type, data, CRC).
 After PLTE, you would typically find IDAT chunks (containing the compressed image data)
