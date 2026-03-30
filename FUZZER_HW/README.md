@@ -560,6 +560,12 @@ The interface for a runner is found in `runner.h`
 
 ```C
 typedef struct runner * RUNNER;
+typedef enum runner_state {
+    NO_STATE = -1,
+    VALID,
+    CRASH,
+    TIMEOUT
+} RUNNER_STATE;
 
 RUNNER runner_init();
 void runner_fini(RUNNER runner);
@@ -854,7 +860,7 @@ which are considered no priority are discarded.
 The interface for the main fuzzer component is:
 
 ```C
-int run_fuzzer(FILE *seed_file, int job_count, int input_count, int time_limit, char *target_program[]);
+int run_fuzzer(FILE *seed_file, int job_count, int input_count, int time_limit, char *program[]);
 ```
 
 The `run_fuzzer` function serves as the entry point into the fuzzer program.

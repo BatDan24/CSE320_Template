@@ -1,3 +1,9 @@
+# === DO NOT MODIFY THIS FILE ===
+# Modifying this file may break the build system. During grading,
+# we will be replacing this file with our own copy. You have been
+# warned.
+# === DO NOT MODIFY THIS FILE ===
+
 CC := clang
 EXEC := fuzzer
 TEST_EXEC := $(EXEC)_tests
