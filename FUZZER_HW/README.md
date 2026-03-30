@@ -924,7 +924,7 @@ individual components described above can be tested individually.
 However, to test automated testing on the whole program, you will be
 required to call certain functions at specific times during execution.
 These functions are provided to you in a library file that gets linked 
-with your code. When you invoke the program via `bin/presi`, then event 
+with your code. When you invoke the program via `bin/fuzzer`, then event 
 functions just generate printout on the terminal when the functions are 
 called, to help you make sure that you have called them correctly. In
 our testing scripts, the event functions will instead communicate over
