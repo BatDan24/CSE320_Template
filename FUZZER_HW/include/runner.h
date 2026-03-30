@@ -11,7 +11,21 @@
 
 #include "input.h"
 
+/*
+ * This type represents a runner job. It contains all the data necessary
+ * for managing the runner process and for the interprocess communication
+ * involving the runner.
+ *
+ * See the assignment document for more details!
+ */
 typedef struct runner * RUNNER;
+
+/*
+ * This enum represents the different states that the result of running
+ * the target program can end in.
+ *      (1) NO_STATE: Used as a return code
+ *
+ */
 typedef enum runner_state {
     NO_STATE = -1,
     VALID,

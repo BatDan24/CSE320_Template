@@ -32,11 +32,18 @@
     fprintf(file, "  -t time_limit         Set the time limit for the target program in seconds. Default is %d\n", DEFAULT_TIMEOUT_SEC); \
 } while(0)
 
+/*
+ * Potentially useful global variables
+ */
 extern char *cmd;
 extern char **args;
 extern size_t program_argc;
 extern int timeout;
 
+/*
+ * The hash function which you will primarily be using throughout this
+ * program
+ */
 uint64_t hash(uint64_t n);
 #define HASH(n) hash((n))
 
