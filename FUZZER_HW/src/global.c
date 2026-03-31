@@ -1,3 +1,11 @@
+/*
+ * === DO NOT MODIFY THIS FILE ===
+ * During testing, we will replace this file with our
+ * own. You can create your own header files if necessary.
+ * You have been warned. 
+ * === DO NOT MODIFY THIS FILE ===
+ */
+
 #include "global.h"
 
 uint64_t hash(uint64_t n) {
