@@ -1,7 +1,7 @@
 # Homework 4 Coverage-Guided Fuzzer - CSE 320 - Spring 2026
 #### Professor Dan Benz
 
-### **Due Date: Sunday April 19th at 23:59 (11:59 pm)**
+### **Due Date: INSERT DUE DATE HERE**
 
 ## Introduction
 
@@ -20,7 +20,7 @@ and a set number of additional generated inputs to test the supplied program wit
 After completing this assignment, you should:
 
 * Understand process execution: forking, executing, and reaping.
-* Understand various IPCs and their different uses: pipe, signals, and shared memory.
+* Understand various IPCs and their different uses: pipe and shared memory.
 * Understand signal handling.
 * Understand the use of "dup" to perform I/O redirection.
 * Have gained experience with C libraries and system calls.
@@ -104,7 +104,7 @@ from section 3 of the `man` pages, you would enter `man 3 printf` into your term
 ## Technical Background
 
 The information presented here serves as a high-level background to help you understand
-this assignment. Additional more technical information are added within the block quotes 
+this assignment. Additional technical information are added within the block quotes 
 for if you are curious.
 
 ### Fuzzing
@@ -132,7 +132,7 @@ and 50,000 bugs across 1,000 projects.
 
 One way of categorizing sanitizers is between black-box fuzzing, white-box fuzzing,
 and finally grey-box fuzzing. Black-box fuzzing involves fuzzing a program without
-any information on the program source code, hence the program is a black box. In
+any information on the program source code. Hence the program is a black box. In
 contrast, white-box fuzzing requires access to the source code of a program to perform
 complex static and dynamic analysis or constraint solving to discover inputs which may 
 cause the program to crash. Finally, grey-box fuzzing is a middle-ground between 
@@ -154,7 +154,7 @@ generate new inputs by slightly modifying existing inputs.
 > the basic block has to be executed, i.e., a basic block is all instructions up to the
 > first jump or branch instruction. The edges represent the control flow between them.
 > Thus, the coverage-feedback data is the walk of the CFG that a program takes when
-> supplied with an input. 
+> given an input. 
 
 ### Compiler Toolchains
 
@@ -258,6 +258,7 @@ Here is the structure of the base code:
 * The `programs` directory contains test programs which should be used to test the fuzzer
   implementation. It also contains a mechanism to creating and building new programs 
   efficiently. All programs here are compiled and linked with the coverage sanitizers.
+  See the README in the directory to learn how to make use of it.
 
 * The `src` directory contains C source files (with extension `.c`).
 
@@ -268,14 +269,14 @@ Here is the structure of the base code:
 
 ### Preliminary
 
-As stated previously, we will be used LLVM and the `clang` compiler for this assignment.
+As stated previously, we will be useing LLVM and the `clang` compiler for this assignment.
 Thus, make sure you have installed the following packages:
 
 * `clang`
 * `libclang-rt-18-dev`
 
 After installing these packages, you should be able to use `clang` and have the headers
-necessary for the coverage sanitizer in `clang`.
+necessary for the coverage sanitizer.
 
 ### Program Operation and Argument Validation
 
@@ -287,7 +288,7 @@ are as follows:
 Usage: ./bin/fuzzer [options] PROGRAM ARGS...
 Options:
   -h                    Print this help message
-  -j jobs               Number of jobs used for fuzzing. Default is 4
+  -j jobs               Number of jobs used for fuzzin+g. Default is 4
   -n inputs             Total number of inputs to attempt. Default is 32
   -s seed_file          Input file containing newline-separated initial inputs to the fuzzer. REQUIRED
   -t time_limit         Set the time limit for the target program in seconds. Default is 5
@@ -296,11 +297,11 @@ Options:
 > :scream: A `PRINT_USAGE` macro has already been provided for you in the `global.h`
 > header file.  You should use this macro to print the help message.
 
-To make the fuzzer more efficient, the fuzzer will be executing the target programs simultaneously using 
+To make the fuzzer more efficient, the fuzzer will be running the target programs simultaneously using 
 different inputs. This will be accomplished by using child processes via `fork` and `execvp`. The number
 of jobs that the fuzzers will use is specified via the `-j` flag. Jobs will be explained in a later section.
 
-The fuzzer also requires an initial set of inputs called the input seed. This is specified using the `-s` 
+The fuzzer also requires an initial set of inputs called the input seeds. This is specified using the `-s` 
 flag. This is a required flag, and it is an error if it is omitted. 
 
 Traditionally, fuzzers run continuously until a user prompts the fuzzer to stop. However, in this assignment,
@@ -315,11 +316,11 @@ specified using the `-t` flag. The unit of the time limit is in seconds.
 
 `PROGRAM` is the target program to be fuzzed. This program must be compiled and linked with the coverage 
 sanitizer (See `programs` directory for such programs and how to write your own). `ARGS...` is a list of
-arguments that will be supplied to the target program. At most one of the arguments in `ARGS...` must be
+arguments that will be supplied to the target program. Exactly one of the arguments in `ARGS...` must be
 `@@` which will be a placeholder which the fuzzer will replace with the input it wants to test.  
 
 If the option `-h` is set at any point, the program should write its help message to standard out and
-exit with `EXIT_SUCCESS`.
+exit with `EXIT_SUCCESS`. It should not run the fuzzer.
 
 At this point, you should be familiar with implementing code to parse the arguments to the fuzzer. One
 nuance for when you implement the code for this project, however, is that your implementation should
@@ -370,35 +371,37 @@ The input queue will include the initial set of inputs provided by the seed file
 
 The **Mutation Engine** is the component which is responsible for converting one input to another
 using some method. The specifics of mutation engine you will implement will be described in greater
-detail later. The general path that an input takes is that it is first dequeued from the input queue.
-Next, it is passed into the mutation engine which will create a new input. This input will
-then be passed onto a runner. 
+detail later. At a high level, inputs are first dequeued from the input queue where it is then passed
+through the mutation engine. The mutation engine will create a new mutated input based on the supplied
+dequeued input. This input will then be sent to one of the runner processes.
 
-The **Runner Job** is the component which is responsible for running the target program with the
-input it is supplied. It will either run the program and then wait for the target program to terminate
-or terminate it itself if the program's time limit is exceeded. Finally, the runner job is responsible
-for sending the **Main Fuzzer** the results and notify that it is once again ready for another input.
+The **Runner Job** is the component which is responsible for running the target program with an
+input that it received from the main process. It will either run the program and then wait for the target 
+program to terminate or terminate it itself if the program's time limit is exceeded. Finally, the runner 
+job is responsible for sending the **Main Fuzzer** the results and notify that it is once again ready 
+for another input.
 
-The **Coverage Map** is the component which will utilize the coverage-feedback data it is obtained from
-running the program. If the input did not lead to a crash or a time-out, then the coverage-feedback data
-is used to determine if the input has lead to a novel program execution path. If so, the fuzzer will 
-add it to the input queue. Otherwise, the input is discarded. This allows the fuzzer to filter inputs
-and avoid duplicates from filling up the input queue.
+The **Coverage Map** is the component which will utilize the coverage-feedback data obtained from running 
+the target program. If the input did not lead to a crash or a time-out in the target process, then the 
+coverage-feedback data is used to determine if the input has lead to a novel program execution path. 
+If so, the fuzzer will add it to the input queue. Otherwise, the input is discarded. This allows the 
+fuzzer to filter inputs and avoid duplicates inputs which cause similar program behavior from filling 
+up the input queue.
 
 The **Main Fuzzer** is the component which utilizes the other components to build the core logic for
 the fuzzer. It is responsible for reading the initial inputs from the seed file and inserting them
-into the input queue. It is also responsible for dequeueing inputs and passing it through the
-fuzzer. Next, it will pass mutated inputs to the runners. Once it has been alerted that a runner
-has completed, it will determine if the results of running the program means that the input should
-be added into the input queue via the coverage map.
+into the input queue so that it is eventually executed by a runner process. It is also responsible 
+for dequeueing inputs and passing it through the mutation engine. Next, it will pass mutated inputs 
+to the runners. Once it has been alerted that a runner has completed, it will determine if the results 
+of running the program means that the input should be added into the input queue via the coverage map.
 
 Finally, the **Event Logger** is a component which you will not be implementing. Instead this component
 is a list of functions which will be used to facilitate the testing and to verify if your implemented
 fuzzer works correctly. You will be responsible for calling the adequate function at certain points
 in your program which will be described in a later section.
 
-Included below is an image showing a model of the system and the interactions between components. Be sure
-to refer back to this image frequently.
+Included below is an image showing a model of the system and the interactions between components. 
+Be sure to refer back to this image frequently.
 
 ![Fuzzer Diagram](FuzzerDiagram.png)
 
@@ -427,7 +430,7 @@ thoroughly in the mutation engine section.
 
 > :nerd_face: I would recommend to implement INPUT as an opaque pointer. Opaque pointers
 > are pointer which point to a data structure whose representation is unknown at the time
-> of its definition. This means that you cannot access its data members either via `->` and
+> of its definition. This means that you cannot access its data members via `->` and
 > you cannot dereference it. The benefit of opaque pointers is that it enables better
 > modularization of code by encapsulating the data stored in the data structure.
 >
@@ -438,7 +441,7 @@ thoroughly in the mutation engine section.
 > code can only manipulate the data at the pointer via the API.
 >
 > An opaque pointer is created by using a `typedef` defining a type as the pointer to some
-> undefined struct.
+> undefined struct as shown above.
 
 The following operations are supported for `INPUT`:
 
@@ -456,7 +459,7 @@ The following operations are supported for `INPUT`:
 
 - The `input_set_state` function sets the `MUTATOR_STATE` of the `INPUT` object
 
-- The `input_state_step` function increments the `MUTATOR_STATE` of the `INPUT` object
+- The `input_state_step` function increments the `MUTATOR_STATE` of the `INPUT` object by one
 
 The functions you are to implement for the input queue can be found in `input_queue.h`
 
@@ -475,7 +478,7 @@ inputs and another for low priority inputs. The difference between a high priori
 and a low priority input is explained in the section on the coverage map component. 
 The `INPUT_QUEUE` type encapsulates both of these queues and the functions above
 describe operations which can be performed on `INPUT_QUEUE`. Additionally, there is
-the additional condition that there cannot be duplicate inputs within a queue. 
+the additional condition that there cannot be duplicate inputs within any queue. 
 
 - The `input_queue_init` function is responsible for initializing an `INPUT_QUEUE` and
   returning it back to the caller to use. This involves initializing both the high
@@ -496,7 +499,7 @@ the additional condition that there cannot be duplicate inputs within a queue.
   low priority queue based on a pattern. The pattern you will be using is nine
   high priority inputs before a single low priority input. This pattern repeats.
   Next, the function will re-enqueue the dequeued input. Finally, it will return a
-  reference to the input back to the caller, i.e., do not return a copy to the caller.
+  reference to the input back to the caller. Do not return a copy to the caller.
 
 These functions serve as the interface for manipulating the input queue component. 
 
@@ -627,10 +630,7 @@ signal will be explained below:
 * `SIGINT`, `SIGTERM`, `SIGHUP`. These are the signals which signal to the runner
   process that it should be terminated. However, it may be that the runner may
   have a child process running, and it is waiting for it to terminate. In that
-  case, the runner must also terminate its child process. In addition, the
-  event logger function `fzl_runner_fini` must be called before the runner terminates.
-  Since this function is not async-signal-safe, it must not be called directly
-  in the signal handler. 
+  case, the runner must also terminate its child process.
 
 * `SIGALRM`. The runner process has to set a time limit for any running child process
   by using the `alarm` system call. However, calling `alarm` in the runner process's
@@ -639,6 +639,10 @@ signal will be explained below:
   You will install a signal handler to detect `SIGALRM`, and once it is received, the
   runner process will forward the signal to the child process using the `kill` system 
   call. Be sure to clear the alarm if the program terminates before the alarm goes off.
+
+* `SIGCHLD`. The runner process should detect `SIGCHLD` so that the process knows when
+  the the runner's child process has terminated. This tells the runner process that it
+  should reap the child process and send the results back to the main fuzzer process.
 
 As a reminder, you should make every effort not to do anything "complicated" in a signal handler.
 Rather the handler should just set flags or other variables to communicate back to
@@ -650,7 +654,18 @@ signals are handled by the signal handler. Using `sigsuspend` also has the added
 of putting the calling process into the wait queue so that other processes can be
 scheduled by the operating system while the process waits for the signal.
 
-An explanation of the interface described in `runner.h`
+The above signals should be handled as soon as possible. Any delay in handling the signals
+may cause your program to fail our tests cases during grading. Therefore, be careful
+of blocking calls such `read` or performing a lot of work before handling the signal.
+For example, consider the case where a signal handler executes and sets a flag before
+the the code running `read` from standard input. Then, the signal will not be handled 
+until the `read` returns. If `read` never returns, the set signal flag is left pending.
+Additionally, be careful of blocked signals during blocking calls. If a signal is blocked
+during a call to `read`, then the signal will remain pending until if `read` returns and
+when the signal is unblocked. Be especially conscious when the code here. Be sure to
+investigate any strange or flaky behavior that your program exhibits!
+
+An explanation of the interface described in `runner.h`:
 
 * `runner_init` initializes a `RUNNER` object but does not launch it (No forking).
   This function should only be called by the main process. This function is responsible 
@@ -680,7 +695,8 @@ An explanation of the interface described in `runner.h`
 * `runner_receive_fuzzer_input` function should be called only by the runner process.
   This function involves the runner attempting to receive an `INPUT` from the main
   fuzzer process through the pipe set up during `runner_init`. This process blocks
-  until input has been received from the main fuzzer process.
+  until input has been received from the main fuzzer process or a signal has been
+  received. 
 
 > :scream: Be careful of blocked signals during blocking calls. If a signal arrive
 > while you are waiting for some event and the signal is blocked, then the signal
@@ -688,6 +704,14 @@ An explanation of the interface described in `runner.h`
 > event may never arrive and your program may hang. Even worse, if a terminating
 > signal is blocked during a blocking call, then there may be no way to terminate
 > the process other than `SIGKILL`!
+>
+> Therefore, I would recommend you to use `pselect` system call. This function
+> will block until either the selected file descriptor is ready or a signal is
+> received. In this function, the only signals you should be concerned with are
+> the terminating signals. This is because you should not be receiving a `SIGALRM`
+> because the runner should only call this function when there the runner
+> does not have an active input it is processing. Similarly, `SIGCHLD` should
+> not be received during this function call.
 
 * `runner_alert_fuzzer` function should be called only by the runner process. This
   function should only be called when the runner's child process has completed. The
@@ -729,9 +753,9 @@ An explanation of the interface described in `runner.h`
   and a process is running, it should forward the `SIGALRM` to the child process to 
   terminate it. If the runner receives a `SIGCHLD`, then the program should reap 
   its child process and obtain the status of the program to send back to main 
-  process using `runner_alert_fuzzer`. This loop repeats until the runner 
-  receives a termination signal in which it should handle cleaning the process 
-  up before exiting. 
+  process using `runner_alert_fuzzer`. The function should also reset the alarm so that
+  it is no longer received. This loop repeats until the runner receives a termination signal 
+  in which it should handle cleaning the process up before exiting. 
   
   On the parent process side of `runner_launch`, be sure to also close the appropriate 
   ends its pipes as well.
@@ -995,3 +1019,10 @@ as well.
 
 * `fzl_fini` - This function should be the last function that is called before
   the `run_fuzzer` function returns. This must be called by the main fuzzer process.
+
+Again, these functions are timing-sensitive. Calling the appropriate function too slowly
+may cause you to fail our test cases. For example, if the test case sends the child runner 
+process a `SIGTERM`, then the test case should expect to see a call to `fzl_runner_fini`
+soon after. A `fzl_runner_received_input` should be seen soon after a `fzl_sending_input`.
+Similarly, `fzl_received_status` should be seen after the test case sends a `SIGUSR1` or
+`fzl_runner_sending_status` call. 

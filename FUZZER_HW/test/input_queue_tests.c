@@ -1,4 +1,5 @@
 #include <criterion/criterion.h>
+#include <criterion/internal/assert.h>
 
 #include "input_queue.h"
 
@@ -6,6 +7,8 @@ TestSuite(input_queue_tests, .timeout = 1);
 
 Test(input_queue_tests, input_queue_enqueues_0) {
     INPUT_QUEUE queue = input_queue_init();
+    cr_assert_not_null(queue, "Expected queue to be non-null");
+
     INPUT hi_prio_inputs[] = {
         make_input("a"),
         make_input("b"),

@@ -93,7 +93,11 @@ int fuzzer_send_runner_input(RUNNER runner, INPUT input);
  * Handles the logic for the runner process to receive an input from the
  * main fuzzer process. The runner process should read from the appropriate pipe
  * to obtain the input from the fuzzer. This will become the active input, and
- * the runner will execute the target program with the given input.
+ * the runner will execute the target program with the given input. If a 
+ * SIGTERM/SIGINT/SIGHUP is received during this function, the function 
+ * returns NULL. 
+ *
+ * See the assignment document for more information.
  *
  * @param runner    The runner instance
  * @returns the read input from the main fuzzer process or NULL

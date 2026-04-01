@@ -59,7 +59,6 @@ struct RunnerJob {
 
 #define DEFINE_CRITERION_TEST()                                                                                             \
 Test(runner_tests, TEST_NAME) {                                                                                             \
-    fzl_init(NULL);                                                                                                         \
     char *__cmd_args[] = COMMAND;                                                                                           \
     cmd = __cmd_args[0];                                                                                                    \
     args = __cmd_args + 1;                                                                                                  \
@@ -76,6 +75,7 @@ Test(runner_tests, TEST_NAME) {                                                 
                                                                                                                             \
     int ret = 0;                                                                                                            \
     RUNNER runner = runner_init();                                                                                          \
+    cr_assert_not_null(runner, "Expected runner to be non-null");                                                           \
     ret = runner_launch(runner);                                                                                            \
     cr_assert(ret != -1, "Expected runner_launch() to not fail with return value -1");                                      \
                                                                                                                             \
@@ -110,7 +110,6 @@ Test(runner_tests, TEST_NAME) {                                                 
         }                                                                                                                   \
     }                                                                                                                       \
     runner_fini(runner);                                                                                                    \
-    fzl_fini(NULL);                                                                                                         \
 }
 
 
