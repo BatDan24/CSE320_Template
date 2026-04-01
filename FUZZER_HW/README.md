@@ -199,10 +199,11 @@ enable the edge coverage sanitizer, we use the flag `-fsanitize-coverage=trace-p
 
 ## Getting Started
 
-Here is the structure of the base code:
+Here is the relevant structure of the base code:
 <pre>
 .
 ├── Makefile
+├── Mutation.md
 ├── README.md
 ├── include
 │   ├── coverage_map.h
@@ -221,24 +222,31 @@ Here is the structure of the base code:
 │   ├── Makefile.variables
 │   ├── README.md
 │   ├── Template.mk
-|   ├── coverage.c
 │   ├── cascade
 │   │   ├── Makefile
-│   │   ├── build
-│   │   │   ├── cascade.d
-│   │   │   └── cascade.o
 │   │   └── cascade.c
+│   ├── coverage.c
 │   └── hello-world
-│       ├── Makefile
-│       ├── include
-│       │   └── hello.h
-│       └── src
-│           ├── hello.c
-│           └── main.c
+│       ├── Makefile
+│       ├── include
+│       │   └── hello.h
+│       └── src
+│           ├── hello.c
+│           └── main.c
 ├── src
-│   └── main.c
+│   ├── coverage_map.c
+│   ├── fuzzer.c
+│   ├── global.c
+│   ├── input.c
+│   ├── input_queue.c
+│   ├── main.c
+│   ├── mutator.c
+│   └── runner.c
 └── test
-    └── fuzzer_tests.c
+    ├── coverage_map_tests.c
+    ├── input_queue_tests.c
+    ├── macro.h
+    └── runner_tests.c
 </pre>
 
 * The `Makefile` is a configuration file for the `make` build utility, which is what
