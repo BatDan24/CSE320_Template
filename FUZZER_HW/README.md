@@ -1,7 +1,7 @@
 # Homework 4 Coverage-Guided Fuzzer - CSE 320 - Spring 2026
 #### Professor Dan Benz
 
-### **Due Date: INSERT DUE DATE HERE**
+### **Due Date: Sunday April 19th at 11:59 pm**
 
 ## Introduction
 

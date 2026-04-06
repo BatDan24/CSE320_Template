@@ -21,7 +21,7 @@ H_{n,m}(x) &= \text{HASH}(H_{n,m-1}(x)\mod n)
 $$
 
 Let $M$ be the total number of mutations in a cycle. Let $S$ be the 
-current mutation state. Define $K=\lfloor M/S\rfloor+1$ be the 
+current mutation state. Define $K=\lfloor S/M\rfloor+1$ be the 
 cycle index. Finally, given string $A$, let $A[i]$ represent the 
 $i$th character in the string $A$. This is zero-indexed.
 
