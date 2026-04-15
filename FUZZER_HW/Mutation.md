@@ -16,7 +16,7 @@ follows:
 $$
 \begin{aligned}
 H_{n,0}(x) &= x \\
-H_{n,m}(x) &= \text{HASH}(H_{n,m-1}(x)\mod n) 
+H_{n,m}(x) &= \text{HASH}(H_{n,m-1}(x))\mod n 
 \end{aligned}
 $$
 
