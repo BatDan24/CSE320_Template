@@ -4,6 +4,7 @@
 
 # Executables
 bin/
+build/
 
 # Debug
 *.dSYM/
