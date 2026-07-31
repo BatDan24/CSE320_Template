@@ -1,0 +1,9 @@
+# Local build artifacts
+*.o
+tsh
+myspin
+mysplit
+mystop
+myint
+tsh-output.txt
+*~

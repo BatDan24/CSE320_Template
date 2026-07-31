@@ -1,0 +1,15 @@
+# Cache simulator autograder output
+.csim_results
+.marker
+
+# Generated transpose memory traces (valgrind / tracegen)
+trace.tmp
+trace.f*
+trace.all
+
+# Local build artifacts
+*.o
+csim
+test-trans
+tracegen
+*-handin.tar

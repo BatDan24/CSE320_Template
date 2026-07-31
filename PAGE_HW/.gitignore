@@ -1,0 +1,9 @@
+# Page-table simulator autograder output
+.ptsim_results
+.marker
+trace.tmp
+
+# Local build artifacts
+*.o
+ptsim
+*-handin.tar
