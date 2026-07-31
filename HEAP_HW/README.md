@@ -1,4 +1,4 @@
-# Homework 3 Dynamic Memory Allocator - CSE 320
+# Dynamic Memory Allocator - CSE 320
 
 #### Professor Dan Benz
 
