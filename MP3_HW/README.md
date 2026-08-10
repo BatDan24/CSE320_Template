@@ -10,7 +10,7 @@ parsing, bitwise manipulation, and pointers by working with a real binary format
 
 **THIS ASSIGNEMNT IS EXPECTED TO TAKE A LOT OF TIME, JUST BECAUSE YOU HAVE 4 WEEKS DOES NOT MEAN YOU SHOULD PROCRASTINATE**
 
-You assignment will be graded by codegrade and will feature some of the tests provided in this repository as well as other tests that will be hidden until after the deadline for the assignment has passed. Make sure to test your code above and beyond the provided tests.
+Your assignment will be graded by codegrade and will feature some of the tests provided in this repository as well as other tests that will be hidden until after the deadline for the assignment has passed. Make sure to test your code above and beyond the provided tests.
 
 Your program is a command-line utility that opens MP3 files and processes queries
 specified as command-line arguments. Results are printed to standard output.
