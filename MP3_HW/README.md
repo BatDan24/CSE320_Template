@@ -128,9 +128,9 @@ Options:
 
 ```
 
-The program uses the same two-pass argument processing approach as the PNG utility:
-validate `-f` and `-h` in a first pass, then dispatch feature flags in a second pass.
-Use `PRINT_USAGE` from `global.h` for the help text.
+Your program should process arguments in two passes: first validate `-f` and `-h`, then 
+dispatch the feature flags in a second pass. Use `PRINT_USAGE` from `global.h` for the 
+help text.
 
 ## Program Output, `global.h`, and `debug.h`
 
