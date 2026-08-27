@@ -348,7 +348,7 @@ The first frame in this file starts at offset `0x0A` (10 decimal):
 ```
 00000000  49 44 33 03 00 00 00 00  00 2c 54 49 54 32 00 00  |ID3......,TIT2..|
 00000010  00 0b 00 00 00 00 54 65  73 74 20 53 6f 6e 67 54  |......Test SongT|
-          -- frame data ends here --^
+                      -- first frame data ends here --^
 ```
 
 - **Frame ID** (4 bytes at offset `0x0A`): `0x54`, `0x49`, `0x54`, `0x32` = `TIT2` (title)
