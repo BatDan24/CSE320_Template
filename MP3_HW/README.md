@@ -279,7 +279,7 @@ As test input for your code, several MP3 files are provided in the `tests/data/`
 directory. MP3 files are binary files that may contain ID3 metadata tags and a
 sequence of MPEG audio frames. There is no single fixed header at the
 very start of every file — some files begin with an ID3v2 tag, while others (such
-as `nananana_batman.mp3`) begin directly with MPEG frame data.
+as `frames_only.mp3`) begin directly with MPEG frame data.
 
 Multi-byte integer fields in ID3 tags are stored in **big-endian** format (most
 significant byte first). ID3v2 tag *sizes* use a special **synchsafe** encoding
@@ -412,14 +412,13 @@ pattern repeats until the end of the audio stream (or until an ID3v1 tag is foun
 A real-world file without an ID3v2 prefix looks like this:
 
 ```
-$ hd tests/data/nananana_batman.mp3 | head -3
-00000000  ff fb 90 64 00 00 00 00  00 00 00 00 00 00 00 00  |...d............|
+$ hd tests/data/frames_only.mp3 | head -3
+00000000  ff fb 90 00 00 01 02 03  04 05 06 07 08 09 0a 0b  |................|
 ```
 
-Here the file begins directly with `0xFF 0xFB` — the MPEG sync word — because
-no ID3v2 tag is present. The third header byte `0x64` differs from `0x90` in the
-fixture file; decoding it yields a different channel mode (Joint Stereo) while
-bitrate and sample rate remain 128 kbps at 44100 Hz.
+Here the file begins directly with `0xFF 0xFB` (the MPEG sync word) because no 
+ID3v2 tag is present. The four header bytes are identical to the earlier example, 
+so the frame decodes the same way: 128 kbps, 44100 Hz, Stereo.
 
 ### Reading the ID3v1 Tag at End of File
 
@@ -616,7 +615,7 @@ bin/mp3 -f tests/data/Batman.mp3 -s -i -t
 bin/mp3 -f tests/data/Batman.mp3 -l
 bin/mp3 -f tests/data/Batman.mp3 -p
 bin/mp3 -f tests/data/Batman.mp3 -c 10 20 -o /tmp/clip.mp3
-bin/mp3 -f tests/data/Batman.mp3 -m tests/data/Recording.mp3 -a 36 -o /tmp/mixed.mp3
+bin/mp3 -f tests/data/Batman.mp3 -m tests/data/short_mono.mp3 -a 36 -o /tmp/mixed.mp3
 ```
 
 ## Allowed Libraries
