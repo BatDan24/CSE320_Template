@@ -405,8 +405,8 @@ With **128 kbps** and **44100 Hz** on MPEG-1 Layer III, the frame size is:
 
 `144 × 128000 / 44100 + 0` = **417 bytes**
 
-So the first MPEG frame occupies offsets `0x36` through `0x1A6` (54 + 417 − 1).
-The next frame begins at offset `0x1A7` with another `0xFF` sync byte, and the
+So the first MPEG frame occupies offsets `0x36` through `0x1D6` (54 + 417 − 1).
+The next frame begins at offset `0x1D7` with another `0xFF` sync byte, and the
 pattern repeats until the end of the audio stream (or until an ID3v1 tag is found).
 
 A real-world file without an ID3v2 prefix looks like this:
