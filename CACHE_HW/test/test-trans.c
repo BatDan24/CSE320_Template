@@ -36,11 +36,34 @@ struct results {
 };
 static struct results results = {-1, 0, INT_MAX};
 
+/*
+ * Fail closed if trans.c violates Part B programming rules (arrays, malloc,
+ * extra file-scope storage, recursion, or more than 12 local ints).
+ */
+static void run_trans_rule_check(void)
+{
+    int rc = system("python3 test/check-trans.py src/trans.c");
+    if (rc == -1 || !WIFEXITED(rc) || WEXITSTATUS(rc) != 0) {
+        printf("Error: trans.c failed the Part B programming-rules check.\n");
+        printf("Run: python3 test/check-trans.py src/trans.c\n");
+        printf("TEST_TRANS_RESULTS=0:0\n");
+        exit(1);
+    }
+}
+
+static int addr_in_matrices(unsigned long long addr,
+                            unsigned long long a_lo, unsigned long long a_hi,
+                            unsigned long long b_lo, unsigned long long b_hi)
+{
+    return (addr >= a_lo && addr < a_hi) || (addr >= b_lo && addr < b_hi);
+}
+
 void eval_perf(unsigned int s, unsigned int E, unsigned int b, const char *policy)
 {
     int i, flag;
     unsigned int hits, misses, evictions, len;
     unsigned long long int marker_start, marker_end, addr;
+    unsigned long long int a_lo, a_hi, b_lo, b_hi;
     char buf[1000], cmd[512];
     char filename[128];
 
@@ -76,7 +99,13 @@ void eval_perf(unsigned int s, unsigned int E, unsigned int b, const char *polic
 
         FILE *marker_fp = fopen(".marker", "r");
         assert(marker_fp);
-        fscanf(marker_fp, "%llx %llx", &marker_start, &marker_end);
+        if (fscanf(marker_fp, "%llx %llx %llx %llx %llx %llx",
+                   &marker_start, &marker_end, &a_lo, &a_hi, &b_lo, &b_hi) != 6) {
+            fclose(marker_fp);
+            printf("Error: .marker is missing A/B address ranges. Rebuild with make tracegen.\n");
+            printf("TEST_TRANS_RESULTS=0:0\n");
+            exit(1);
+        }
         fclose(marker_fp);
 
         func_list[i].correct = 1;
@@ -99,7 +128,9 @@ void eval_perf(unsigned int s, unsigned int E, unsigned int b, const char *polic
                 if (addr == marker_start) {
                     flag = 1;
                 }
-                if (flag && addr < 0xffffffff) {
+                /* Count only A and B. Stack, heap, and other objects are omitted
+                 * so a scratch buffer cannot hide transpose traffic. */
+                if (flag && addr_in_matrices(addr, a_lo, a_hi, b_lo, b_hi)) {
                     fputs(buf, part_trace_fp);
                 }
                 if (addr == marker_end) {
@@ -150,6 +181,7 @@ void usage(char *argv[])
     printf("  -b <bits>     Block offset bits (default 5)\n");
     printf("  -r <policy>   Replacement policy: lru, fifo, lfu (default lru)\n");
     printf("Example: %s -M 32 -N 32 -s 4 -E 2 -b 5\n", argv[0]);
+    printf("         %s -M 67 -N 61          (67x61: A is 61 rows by 67 cols)\n", argv[0]);
 }
 
 void sigsegv_handler(int signum)
@@ -226,6 +258,7 @@ int main(int argc, char *argv[])
     }
 
     alarm(120);
+    run_trans_rule_check();
     eval_perf(cache_s, cache_E, cache_b, cache_policy);
 
     if (results.funcid == -1) {

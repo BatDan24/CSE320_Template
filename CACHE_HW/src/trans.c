@@ -7,6 +7,10 @@
  * Transpose performance is evaluated on 1 KB caches with 32-byte blocks.
  * test-trans sets trans_cache_profile so transpose_submit can select a
  * strategy tuned for direct-mapped, 2-way, or 4-way organizations.
+ *
+ * Programming rules (enforced by test/check-trans.py): at most 12 local
+ * ints per function; no arrays, malloc, structs, file-scope data, or
+ * recursion. Helpers are allowed if they follow the same rules.
  */
 #include <stdio.h>
 #include "cachelab.h"
