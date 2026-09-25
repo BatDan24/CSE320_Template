@@ -1,0 +1,17 @@
+# build artifacts
+svc
+svc-ref
+svc-asan
+svm
+gen
+*.o
+*.bvm
+*.dSYM/
+
+# grading working files
+corpus_out/
+grading/checksums.txt
+
+# macOS AppleDouble / metadata
+._*
+.DS_Store
