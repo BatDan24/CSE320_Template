@@ -32,6 +32,7 @@ CACHE_HW/
 │   └── tracegen.c    # Used by test-trans
 └── test/
     ├── test-trans.c  # Local transpose harness
+    ├── check-trans.py
     └── traces/       # Small public traces for Part A
 ```
 
@@ -63,6 +64,7 @@ By completing this lab, you should be able to:
 | `src/trans.c` | **Your transpose implementation (Part B)** — starter skeleton |
 | `test/traces/` | Small public traces for Part A (`yi.trace`, `yi2.trace`, `dave.trace`, `policy.trace`) |
 | `test/test-trans.c` | Local harness for Part B transpose experiments |
+| `test/check-trans.py` | Static checker for Part B programming rules |
 | `generator/tracegen.c` | Trace generator used by `test-trans` |
 
 ---
@@ -99,19 +101,35 @@ All transpose tests use a **1 KB cache** with 32-byte blocks (`b=5`) and LRU rep
 
 #### All 21 graded combinations
 
-Each matrix shape below is graded on all three cache configurations:
+`M` and `N` are not interchangeable. In `transpose_submit(int M, int N, int A[N][M], int B[M][N])`:
 
-| Shape | `M` | `N` |
-|-------|-----|-----|
-| 32×32 | 32 | 32 |
-| 64×64 | 64 | 64 |
-| 61×67 | 67 | 61 |
-| 48×48 | 48 | 48 |
-| 57×57 | 57 | 57 |
-| 96×32 | 96 | 32 |
-| 32×96 | 32 | 96 |
+- **`M`** = columns of `A` / rows of `B` (`-M` to `test-trans`)
+- **`N`** = rows of `A` / columns of `B` (`-N` to `test-trans`)
+
+So `A` is `N×M` and `B` is `M×N`. Shape names below are **`M×N`**, the same order as the flags. The irregular case is **`67×61`** (`-M 67 -N 61`), not `-M 61 -N 67`.
+
+Each shape is graded on all three cache configurations:
+
+| Shape (`M×N`) | `M` | `N` | Local command |
+|---------------|-----|-----|----------------|
+| 32×32 | 32 | 32 | `./test-trans -M 32 -N 32` |
+| 64×64 | 64 | 64 | `./test-trans -M 64 -N 64` |
+| 67×61 | 67 | 61 | `./test-trans -M 67 -N 61` |
+| 48×48 | 48 | 48 | `./test-trans -M 48 -N 48` |
+| 57×57 | 57 | 57 | `./test-trans -M 57 -N 57` |
+| 96×32 | 96 | 32 | `./test-trans -M 96 -N 32` |
+| 32×96 | 32 | 96 | `./test-trans -M 32 -N 96` |
 
 Transpose correctness and miss counts are evaluated on the course autograder after you submit. A working Part A simulator is required because transpose performance is measured by replaying memory traces through your `csim`.
+
+Check the Part B programming rules, then measure misses locally:
+
+```bash
+python3 test/check-trans.py src/trans.c
+./test-trans -M 32 -N 32
+./test-trans -M 67 -N 61
+./test-trans -M 32 -N 32 -s 4 -E 2 -b 5
+```
 
 ### Submission instructions
 
@@ -208,7 +226,7 @@ locally on `test/traces/policy.trace`, `yi.trace`, `yi2.trace`, and `dave.trace`
 
 ### Task
 
-Implement `transpose_submit()` in `src/trans.c` so that it correctly transposes an `N×M` matrix `A` into an `M×N` matrix `B`, where `B[j][i] = A[i][j]`.
+Implement `transpose_submit()` in `src/trans.c` so that it correctly transposes an `N×M` matrix `A` into an `M×N` matrix `B`, where `B[j][i] = A[i][j]`. Parameter order is `M` then `N`: `A` has `N` rows and `M` columns.
 
 Your function is evaluated by generating a Valgrind memory trace and replaying it through your own `csim` simulator. **Each of the 7 matrix shapes is graded separately on direct-mapped, 2-way, and 4-way 1 KB caches** (21 performance tests total).
 
@@ -230,7 +248,25 @@ char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N]);
 ```
 
+`M` is passed first, but it indexes the **second** dimension of `A`. Dispatch on the numeric `(M, N)` pair from the table above (for the odd rectangle that is `M == 67 && N == 61`).
+
 **Do not change** the description string `"Transpose submission"`. The autograder uses it to identify your official submission.
+
+### Programming Rules
+
+The autograder **only counts memory accesses to matrices `A` and `B`**. Stack, heap, and any other objects are omitted from the trace. That is required so register spills do not pollute miss counts, but it also means extra storage would let you copy `A` sequentially, transpose in uncounted memory, and write `B` sequentially — bypassing the cache-efficiency goal.
+
+You **must** follow all of the following. Helper functions are allowed; each helper must also obey these rules.
+
+1. Submit your transpose code in `src/trans.c` only.
+2. You may not use arrays (including VLAs), other than the `A` and `B` parameters and the `char ...[]` description strings.
+3. You may not call `malloc`, `calloc`, `realloc`, `alloca`, `mmap`, or otherwise allocate extra buffers.
+4. You may not use `struct` or `union` types, and you may not declare file-scope integer or array objects as scratch storage.
+5. You may define **at most 12 local variables of type `int` per function**, including loop-scoped `for (int i = ...)` declarations. Function parameters do not count.
+6. You may not use recursion (a function may not call itself, directly or indirectly).
+7. Do not modify the `Makefile`, `test-trans.c`, `tracegen.c`, or `check-trans.py` to weaken these checks.
+
+`python3 test/check-trans.py src/trans.c` enforces these rules. `./test-trans` runs the same checker and awards **0 points for Part B** if it fails.
 
 ### Test Cases and Thresholds
 
@@ -244,9 +280,9 @@ Each test awards **1 point** at the full-credit miss threshold or below. Partial
 | 64×64 | direct | 1200 | 2400 |
 | 64×64 | 2-way | 1500 | 3000 |
 | 64×64 | 4-way | 1800 | 3600 |
-| 61×67 | direct | 2000 | 4000 |
-| 61×67 | 2-way | 1700 | 3400 |
-| 61×67 | 4-way | 1700 | 3400 |
+| 67×61 | direct | 2000 | 4000 |
+| 67×61 | 2-way | 1700 | 3400 |
+| 67×61 | 4-way | 1700 | 3400 |
 | 48×48 | direct | 700 | 1400 |
 | 48×48 | 2-way | 600 | 1200 |
 | 48×48 | 4-way | 600 | 1200 |
@@ -268,7 +304,7 @@ Miss counts between the thresholds receive partial credit (linear interpolation)
 - **Blocking/tiling** improves temporal locality by reusing a small block before it is evicted.
 - Direct-mapped, 2-way, and 4-way caches use **different set counts**, so the same tile size is rarely optimal for all three — consider shape- and cache-specific helpers inside `transpose_submit`.
 - For some matrix sizes, `A` and `B` map to overlapping cache sets; you may need extra techniques beyond basic blocking.
-- Keep local variable count reasonable; excess locals may spill to the stack and add trace noise.
+- A handful of `int` temporaries (at most 12 per function) can hold a cache line so you can read `A` with spatial locality and write `B` without thrashing. Do not use arrays or other extra storage: those accesses are **not** traced, so they would inflate your score without improving locality.
 
 ---
 
@@ -278,6 +314,7 @@ This is an individual assignment.
 
 - You may discuss **concepts** (replacement policies, set indexing, blocking) with classmates.
 - You may **not** share code or use code you do not understand and cannot explain.
+- Using extra arrays, `malloc`, or other uncounted storage to hide transpose accesses is cheating, even if the program is correct.
 - Using AI coding tools to generate full solutions violates the course academic integrity policy.
 
 ---
@@ -294,5 +331,5 @@ This is an individual assignment.
 
 1. Re-read the trace format and verify your address decomposition with `-v`.
 2. Compare one small trace manually: `./csim -v -s 2 -E 2 -b 4 -t test/traces/policy.trace -r fifo`.
-3. For Part B, verify correctness with small hand-written matrices before relying on autograder feedback.
+3. For Part B, run `python3 test/check-trans.py src/trans.c` and verify correctness with small hand-written matrices before relying on autograder feedback.
 4. Ask course staff about **concepts**; do not ask them to debug full solutions during office hours without prior work shown.

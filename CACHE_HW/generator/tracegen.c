@@ -81,12 +81,19 @@ int main(int argc, char* argv[]){
     /* Fill A with data */
     randMatrix(M,N, A); 
 
-    /* Record marker addresses */
+    /* Record marker addresses and the A/B matrix bounds.
+     * test-trans uses the markers to window the trace, then keeps only
+     * accesses that fall inside A or B (stack/heap/other BSS is omitted).
+     */
     FILE* marker_fp = fopen(".marker","w");
     assert(marker_fp);
-    fprintf(marker_fp, "%llx %llx", 
+    fprintf(marker_fp, "%llx %llx %llx %llx %llx %llx",
             (unsigned long long int) &MARKER_START,
-            (unsigned long long int) &MARKER_END );
+            (unsigned long long int) &MARKER_END,
+            (unsigned long long int) A,
+            (unsigned long long int) A + sizeof(A),
+            (unsigned long long int) B,
+            (unsigned long long int) B + sizeof(B));
     fclose(marker_fp);
 
     if (-1==selectedFunc) {

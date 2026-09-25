@@ -279,7 +279,7 @@ As test input for your code, several MP3 files are provided in the `tests/data/`
 directory. MP3 files are binary files that may contain ID3 metadata tags and a
 sequence of MPEG audio frames. There is no single fixed header at the
 very start of every file — some files begin with an ID3v2 tag, while others (such
-as `nananana_batman.mp3`) begin directly with MPEG frame data.
+as `frames_only.mp3`) begin directly with MPEG frame data.
 
 Multi-byte integer fields in ID3 tags are stored in **big-endian** format (most
 significant byte first). ID3v2 tag *sizes* use a special **synchsafe** encoding
@@ -348,7 +348,7 @@ The first frame in this file starts at offset `0x0A` (10 decimal):
 ```
 00000000  49 44 33 03 00 00 00 00  00 2c 54 49 54 32 00 00  |ID3......,TIT2..|
 00000010  00 0b 00 00 00 00 54 65  73 74 20 53 6f 6e 67 54  |......Test SongT|
-          -- frame data ends here --^
+                      -- first frame data ends here --^
 ```
 
 - **Frame ID** (4 bytes at offset `0x0A`): `0x54`, `0x49`, `0x54`, `0x32` = `TIT2` (title)
@@ -405,21 +405,20 @@ With **128 kbps** and **44100 Hz** on MPEG-1 Layer III, the frame size is:
 
 `144 × 128000 / 44100 + 0` = **417 bytes**
 
-So the first MPEG frame occupies offsets `0x36` through `0x1A6` (54 + 417 − 1).
-The next frame begins at offset `0x1A7` with another `0xFF` sync byte, and the
+So the first MPEG frame occupies offsets `0x36` through `0x1D6` (54 + 417 − 1).
+The next frame begins at offset `0x1D7` with another `0xFF` sync byte, and the
 pattern repeats until the end of the audio stream (or until an ID3v1 tag is found).
 
 A real-world file without an ID3v2 prefix looks like this:
 
 ```
-$ hd tests/data/nananana_batman.mp3 | head -3
-00000000  ff fb 90 64 00 00 00 00  00 00 00 00 00 00 00 00  |...d............|
+$ hd tests/data/frames_only.mp3 | head -3
+00000000  ff fb 90 00 00 01 02 03  04 05 06 07 08 09 0a 0b  |................|
 ```
 
-Here the file begins directly with `0xFF 0xFB` — the MPEG sync word — because
-no ID3v2 tag is present. The third header byte `0x64` differs from `0x90` in the
-fixture file; decoding it yields a different channel mode (Joint Stereo) while
-bitrate and sample rate remain 128 kbps at 44100 Hz.
+Here the file begins directly with `0xFF 0xFB` (the MPEG sync word) because no 
+ID3v2 tag is present. The four header bytes are identical to the earlier example, 
+so the frame decodes the same way: 128 kbps, 44100 Hz, Stereo.
 
 ### Reading the ID3v1 Tag at End of File
 
@@ -616,7 +615,7 @@ bin/mp3 -f tests/data/Batman.mp3 -s -i -t
 bin/mp3 -f tests/data/Batman.mp3 -l
 bin/mp3 -f tests/data/Batman.mp3 -p
 bin/mp3 -f tests/data/Batman.mp3 -c 10 20 -o /tmp/clip.mp3
-bin/mp3 -f tests/data/Batman.mp3 -m tests/data/Recording.mp3 -a 36 -o /tmp/mixed.mp3
+bin/mp3 -f tests/data/Batman.mp3 -m tests/data/short_mono.mp3 -a 36 -o /tmp/mixed.mp3
 ```
 
 ## Allowed Libraries

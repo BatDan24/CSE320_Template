@@ -3,11 +3,18 @@
 # Note: requires a 64-bit x86-64 system
 #
 CC = gcc
-CFLAGS = -g -Wall -Werror -std=c99 -m64 -Iinclude
+# -fno-pie/-no-pie keeps A and B in the low 32-bit address range so the
+# transpose harness can distinguish matrix accesses from stack/heap.
+CFLAGS = -g -Wall -Werror -std=c99 -m64 -fno-pie -no-pie -Iinclude
 
 INCLUDE = include/cachelab.h
 
 all: csim test-trans tracegen
+
+.PHONY: all clean check-trans-src
+
+check-trans-src:
+	python3 test/check-trans.py src/trans.c
 
 csim: src/csim.c src/cachelab.c $(INCLUDE)
 	$(CC) $(CFLAGS) -o csim src/csim.c src/cachelab.c -lm
