@@ -187,7 +187,9 @@ Each line has the form:
 | `M` | Modify (load followed by store to the same address) |
 | `I` | Instruction fetch — **ignore for this lab** |
 
-Addresses may be hexadecimal. If an access spans multiple cache blocks, simulate **one cache access per block touched**.
+All addresses are **hexadecimal** (64-bit, written without a `0x` prefix). For example, `L 10,1` loads address `0x10` (decimal 16), and `S 7ff000398,8` stores to address `0x7ff000398`. Always parse addresses as hex (e.g., with `%llx`), even when they contain only the digits `0`–`9`. The `<size>` field is a decimal byte count.
+
+If an access spans multiple cache blocks, simulate **one cache access per block touched**.
 
 ### Cache Model
 
