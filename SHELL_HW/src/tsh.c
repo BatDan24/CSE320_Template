@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <getopt.h>
 #include <getopt.h>
 
@@ -164,7 +165,18 @@ int main(int argc, char **argv)
  * the foreground, wait for it to terminate and then return.  Note:
  * each child process must have a unique process group ID so that our
  * background children don't receive SIGINT (SIGTSTP) from the kernel
- * when we type ctrl-c (ctrl-z) at the keyboard.  
+ * when we type ctrl-c (ctrl-z) at the keyboard.
+ *
+ * External commands must also support file redirection and pipes:
+ *   < infile      stdin from infile
+ *   > outfile     stdout to outfile, truncated (create if needed)
+ *   >> outfile    stdout appended to outfile (create if needed)
+ *   cmd1 | cmd2   stdout of cmd1 is stdin of cmd2; further stages allowed
+ * Operators are separate tokens. Strip them from argv before execve.
+ * Apply open/dup2 and pipe/dup2 in the child, not the parent. A pipeline
+ * is one job in one process group: wait until every stage has exited,
+ * and forward signals to the whole group. File redirection on a stage
+ * overrides that stage's pipe end.
 */
 void eval(char *cmdline) 
 {
