@@ -1,0 +1,12 @@
+alloc a 4 rw: OK id=1 start=0x1000 pages=4 perms=rw-
+write a 20: OK (tlb miss, page fault)
+read a 20: OK value=20 (tlb hit)
+write a+0x1008 -7: OK (tlb miss, page fault)
+page table: root frame 1
+  L2[0] -> table frame 2
+    L1[0] -> table frame 3
+      L0[1] va 0x1000 -> frame 0 rw-
+      L0[2] va 0x2000 -> frame 4 rw-
+summary: 3 accesses, 1 TLB hits, 2 TLB misses, 2 page faults, 5 frames allocated, 3 table frames, 2 mappings
+free a: OK
+summary: 3 accesses, 1 TLB hits, 2 TLB misses, 2 page faults, 0 frames allocated, 0 table frames, 0 mappings

@@ -1,0 +1,10 @@
+# Starter trace: reserve, touch two pages, inspect the page table, free.
+# Run with: ./bin/sf_vm student_tests/traces/basic.trace
+alloc a 4 rw
+write a 20              # first touch of page 0: page fault
+read a 20               # resident and cached: TLB hit
+write a+0x1008 -7       # first touch of page 1: page fault
+dump
+stats
+free a
+stats                   # every frame should be free again

@@ -1,0 +1,33 @@
+# A complete basic walkthrough: run with --pretty to separate each step.
+# Run with: ./bin/sf_vm --pretty tests/traces/integration.trace
+frames on
+
+# Reserve nine pages, but only touch two. Untouched pages use no frames.
+alloc a 9 rw
+write a 20              # first touch: allocate data and page tables
+read a 20               # same page: TLB hit
+write a+0x8000 -7       # another page with the same TLB slot: conflict
+read a 20               # TLB miss, but no new page fault
+
+dump                    # see both mappings and the tables they share
+tlb                     # see the cached translation
+translate a+8 r         # virtual address -> physical address, without a guest access
+stats
+
+flush                   # clear the cache, keeping the page tables
+read a 20               # TLB miss; the data is still resident
+protect a r             # make the whole region read-only
+write a 99              # denied: the original value must survive
+read a 20
+protect a rw            # restore write permission
+write a 21
+
+free a                  # release data and tables; invalidate cached entries
+read a                  # invalid address: the reservation is gone
+dump
+tlb
+
+alloc b 1 rw            # reuse the freed virtual address
+read b 0                # recycled physical memory must be zeroed
+free b
+stats                   # zero allocated frames, tables, and mappings

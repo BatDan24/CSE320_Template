@@ -1,0 +1,43 @@
+frames on: enabled
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+alloc a 1 rw: OK id=1 start=0x1000 pages=1 perms=rw-
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+write a 10: OK (tlb miss, page fault)
+frames: 4 used, 1020 free (ranges inclusive)
+  used 0-3 (4 frames)
+  free 4-1023 (1020 frames)
+alloc b 1 rw: OK id=2 start=0x2000 pages=1 perms=rw-
+frames: 4 used, 1020 free (ranges inclusive)
+  used 0-3 (4 frames)
+  free 4-1023 (1020 frames)
+write b 20: OK (tlb miss, page fault)
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+free a: OK
+frames: 4 used, 1020 free (ranges inclusive)
+  free 0 (1 frame)
+  used 1-4 (4 frames)
+  free 5-1023 (1019 frames)
+hold 1: held 1 frames
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+release: released 1 frames
+frames: 4 used, 1020 free (ranges inclusive)
+  free 0 (1 frame)
+  used 1-4 (4 frames)
+  free 5-1023 (1019 frames)
+free b: OK
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+frames off: disabled
+hold 1024: held 1024 frames
+frames: 1024 used, 0 free (ranges inclusive)
+  used 0-1023 (1024 frames)
+release: released 1024 frames
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+summary: 2 accesses, 0 TLB hits, 2 TLB misses, 2 page faults, 0 frames allocated, 0 table frames, 0 mappings

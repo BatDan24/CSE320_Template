@@ -1,0 +1,14 @@
+# Starter trace: errors are results, and none of them may allocate frames.
+alloc ro 1 r
+write ro 1              # region denies the write: PROTECTION_FAULT, no page fault
+read ro 0               # reads are allowed and demand-page the region
+read ro+4               # unaligned: INVALID_ADDRESS
+read 0x800000           # not reserved: INVALID_ADDRESS
+free ro
+free ro                 # double free: INVALID_ADDRESS
+alloc a 1 rw
+hold 1024                # take every free frame
+write a 5               # page fault, but no frames: OUT_OF_MEMORY
+release
+write a 5
+stats

@@ -1,0 +1,96 @@
+frames on: enabled
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+alloc a 9 rw: OK id=1 start=0x1000 pages=9 perms=rw-
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+write a 20: OK (tlb miss, page fault)
+frames: 4 used, 1020 free (ranges inclusive)
+  used 0-3 (4 frames)
+  free 4-1023 (1020 frames)
+read a 20: OK value=20 (tlb hit)
+frames: 4 used, 1020 free (ranges inclusive)
+  used 0-3 (4 frames)
+  free 4-1023 (1020 frames)
+write a+0x8000 -7: OK (tlb miss, page fault)
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+read a 20: OK value=20 (tlb miss)
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+page table: root frame 1
+  L2[0] -> table frame 2
+    L1[0] -> table frame 3
+      L0[1] va 0x1000 -> frame 0 rw-
+      L0[9] va 0x9000 -> frame 4 rw-
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+tlb:
+  [1] va 0x1000 -> frame 0 rw-
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+translate a+8 r: OK pa=0x8 frame=0
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+summary: 4 accesses, 1 TLB hits, 3 TLB misses, 2 page faults, 5 frames allocated, 3 table frames, 2 mappings
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+flush: TLB flushed
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+read a 20: OK value=20 (tlb miss)
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+protect a r: OK perms=r--
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+write a 99: PROTECTION_FAULT
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+read a 20: OK value=20 (tlb miss)
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+protect a rw: OK perms=rw-
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+write a 21: OK (tlb miss)
+frames: 5 used, 1019 free (ranges inclusive)
+  used 0-4 (5 frames)
+  free 5-1023 (1019 frames)
+free a: OK
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+read a: INVALID_ADDRESS
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+page table: empty
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+tlb: empty
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+alloc b 1 rw: OK id=2 start=0x1000 pages=1 perms=rw-
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+read b 0: OK value=0 (tlb miss, page fault)
+frames: 4 used, 1020 free (ranges inclusive)
+  used 0-3 (4 frames)
+  free 4-1023 (1020 frames)
+free b: OK
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)
+summary: 10 accesses, 1 TLB hits, 7 TLB misses, 3 page faults, 0 frames allocated, 0 table frames, 0 mappings
+frames: 0 used, 1024 free (ranges inclusive)
+  free 0-1023 (1024 frames)

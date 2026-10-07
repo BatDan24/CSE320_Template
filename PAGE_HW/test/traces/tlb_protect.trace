@@ -1,0 +1,14 @@
+# Starter trace: the TLB and sf_vm_protect.
+alloc a 9 rw
+write a 1               # TLB miss, page fault
+read a 1                # TLB hit
+write a+0x8000 2        # page 8 shares page 0's TLB slot: miss, fault
+read a 1                # miss: evicted from the TLB, but still resident
+tlb
+protect a r
+write a 3               # the region is read-only now: PROTECTION_FAULT
+read a 1                # protect invalidated the entry: miss
+protect a rw
+write a 3
+free a
+stats

@@ -1,0 +1,13 @@
+alloc ro 1 r: OK id=1 start=0x1000 pages=1 perms=r--
+write ro 1: PROTECTION_FAULT
+read ro 0: OK value=0 (tlb miss, page fault)
+read ro+4: INVALID_ADDRESS
+read 0x800000: INVALID_ADDRESS
+free ro: OK
+free ro: INVALID_ADDRESS
+alloc a 1 rw: OK id=2 start=0x1000 pages=1 perms=rw-
+hold 1024: held 1024 frames
+write a 5: OUT_OF_MEMORY (tlb miss, page fault)
+release: released 1024 frames
+write a 5: OK (tlb miss, page fault)
+summary: 6 accesses, 0 TLB hits, 3 TLB misses, 3 page faults, 4 frames allocated, 3 table frames, 1 mappings

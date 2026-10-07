@@ -1,0 +1,17 @@
+# Watch physical frame chunks after each command.
+# Run with: ./bin/sf_vm tests/traces/frames.trace
+frames on
+alloc a 1 rw          # a reservation alone uses no frames
+write a 10            # one data frame and three table frames
+alloc b 1 rw
+write b 20            # shares a's tables, adding one data frame
+free a                # leaves a free hole at frame 0; b keeps the tables
+hold 1                # reuses the lowest free frame
+release
+free b                # all frames become free again
+frames off
+hold 1024             # fill the entire default frame pool
+frames               # a single snapshot while automatic display is off
+release
+frames
+stats

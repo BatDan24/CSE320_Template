@@ -1,0 +1,14 @@
+alloc a 9 rw: OK id=1 start=0x1000 pages=9 perms=rw-
+write a 1: OK (tlb miss, page fault)
+read a 1: OK value=1 (tlb hit)
+write a+0x8000 2: OK (tlb miss, page fault)
+read a 1: OK value=1 (tlb miss)
+tlb:
+  [1] va 0x1000 -> frame 0 rw-
+protect a r: OK perms=r--
+write a 3: PROTECTION_FAULT
+read a 1: OK value=1 (tlb miss)
+protect a rw: OK perms=rw-
+write a 3: OK (tlb miss)
+free a: OK
+summary: 7 accesses, 1 TLB hits, 5 TLB misses, 2 page faults, 0 frames allocated, 0 table frames, 0 mappings
